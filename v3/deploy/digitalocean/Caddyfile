@@ -46,14 +46,6 @@ api.hopeuptech.ca {
         Access-Control-Allow-Credentials "true"
     }
 
-    rate_limit {
-        zone api {
-            key {remote_host}
-            events 100
-            window 1s
-        }
-    }
-
     log {
         output file /var/log/caddy/api.log
         format json
