@@ -1,0 +1,94 @@
+# ─────────────────────────────────────────────────────────────
+# Caddy reverse proxy — automatic HTTPS via Let's Encrypt
+# Domain: hopeuptech.ca
+# ─────────────────────────────────────────────────────────────
+
+{
+    email admin@hopeuptech.ca
+    # Optional: enable for Let's Encrypt rate limit testing
+    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# ─── Frontend (Main App) ───
+app.hopeuptech.ca {
+    encode gzip zstd
+    reverse_proxy frontend:3000
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    }
+
+    log {
+        output file /var/log/caddy/app.log
+        format json
+    }
+}
+
+# ─── Backend API ───
+api.hopeuptech.ca {
+    encode gzip zstd
+    reverse_proxy backend:8000
+
+    @websockets {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    reverse_proxy @websockets backend:8000
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Access-Control-Allow-Origin "https://app.hopeuptech.ca"
+        Access-Control-Allow-Credentials "true"
+    }
+
+    rate_limit {
+        zone api {
+            key {remote_host}
+            events 100
+            window 1s
+        }
+    }
+
+    log {
+        output file /var/log/caddy/api.log
+        format json
+    }
+}
+
+# ─── Admin Panel (also points to frontend with admin route) ───
+admin.hopeuptech.ca {
+    encode gzip zstd
+    reverse_proxy frontend:3000
+
+    @adminOnly {
+        path_regexp adminPath ^/(.*)$
+    }
+    rewrite @adminOnly /admin/{re.adminPath.1}
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "DENY"
+    }
+}
+
+# ─── Docs (static, served by frontend or separate) ───
+docs.hopeuptech.ca {
+    encode gzip zstd
+    reverse_proxy frontend:3000
+    rewrite * /docs{path}
+}
+
+# ─── Status Page ───
+status.hopeuptech.ca {
+    reverse_proxy backend:8000/health
+}
+
+# ─── Root domain redirect to app ───
+hopeuptech.ca, www.hopeuptech.ca {
+    redir https://app.hopeuptech.ca{uri} permanent
+}

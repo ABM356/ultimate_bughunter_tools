@@ -1,0 +1,66 @@
+═════════════════════════════════════════════════════════════
+DNS RECORDS — Add these at your domain registrar for hopeuptech.ca
+═════════════════════════════════════════════════════════════
+
+Replace <DROPLET_IPV4> and <DROPLET_IPV6> with your actual DigitalOcean droplet IPs.
+
+──────────────────────────────────────────────────────────────
+Type    Name              Value                    TTL
+──────────────────────────────────────────────────────────────
+A       @                 <DROPLET_IPV4>           3600
+A       www               <DROPLET_IPV4>           3600
+A       app               <DROPLET_IPV4>           3600
+A       api               <DROPLET_IPV4>           3600
+A       admin             <DROPLET_IPV4>           3600
+A       docs              <DROPLET_IPV4>           3600
+A       status            <DROPLET_IPV4>           3600
+A       staging           <DROPLET_IPV4>           3600
+
+AAAA    @                 <DROPLET_IPV6>           3600
+AAAA    app               <DROPLET_IPV6>           3600
+AAAA    api               <DROPLET_IPV6>           3600
+AAAA    admin             <DROPLET_IPV6>           3600
+AAAA    docs              <DROPLET_IPV6>           3600
+AAAA    status            <DROPLET_IPV6>           3600
+AAAA    staging           <DROPLET_IPV6>           3600
+
+CAA     @                 0 issue "letsencrypt.org"        3600
+TXT     _dmarc            "v=DMARC1; p=quarantine; rua=mailto:admin@hopeuptech.ca"
+──────────────────────────────────────────────────────────────
+
+═════════════════════════════════════════════════════════════
+USING DigitalOcean DNS (recommended if domain is at DO)
+═════════════════════════════════════════════════════════════
+
+doctl compute domain create hopeuptech.ca --ip-address <DROPLET_IPV4>
+
+doctl compute domain records create hopeuptech.ca --record-type A --record-name app    --record-data <DROPLET_IPV4>
+doctl compute domain records create hopeuptech.ca --record-type A --record-name api    --record-data <DROPLET_IPV4>
+doctl compute domain records create hopeuptech.ca --record-type A --record-name admin  --record-data <DROPLET_IPV4>
+doctl compute domain records create hopeuptech.ca --record-type A --record-name docs   --record-data <DROPLET_IPV4>
+doctl compute domain records create hopeuptech.ca --record-type A --record-name status --record-data <DROPLET_IPV4>
+doctl compute domain records create hopeuptech.ca --record-type A --record-name www    --record-data <DROPLET_IPV4>
+
+═════════════════════════════════════════════════════════════
+USING Cloudflare (recommended if you want DDoS protection)
+═════════════════════════════════════════════════════════════
+
+1. Add hopeuptech.ca to Cloudflare
+2. Update your domain registrar's nameservers to Cloudflare's
+3. Add the A records above (proxy can be ON for app/admin/docs/www, OFF for api if WebSockets)
+4. SSL/TLS mode: "Full (strict)"
+5. Edge certificates: enable "Always Use HTTPS"
+
+═════════════════════════════════════════════════════════════
+VERIFICATION
+═════════════════════════════════════════════════════════════
+
+After DNS propagates (5-30 min), verify:
+
+  dig +short app.hopeuptech.ca
+  dig +short api.hopeuptech.ca
+  dig +short admin.hopeuptech.ca
+
+All should return your droplet IP.
+
+═════════════════════════════════════════════════════════════
