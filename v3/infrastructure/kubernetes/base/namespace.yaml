@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hopeup
+  labels:
+    name: hopeup
+    app.kubernetes.io/name: hopeup-platform
+    app.kubernetes.io/part-of: hopeup
+    # PodSecurity admission: enforce restricted profile in production
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

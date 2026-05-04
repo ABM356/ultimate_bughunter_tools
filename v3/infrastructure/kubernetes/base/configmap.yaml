@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hopeup-config
+  namespace: hopeup
+  labels:
+    app: hopeup
+    tier: shared
+data:
+  # Non-secret runtime config. Secrets live in the Secret resource.
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "info"
+  POSTGRES_DB: "hopeup"
+  POSTGRES_HOST: "postgres-headless"
+  POSTGRES_PORT: "5432"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  ELASTICSEARCH_HOST: "elasticsearch"
+  ELASTICSEARCH_PORT: "9200"
+  CELERY_BROKER_DB: "1"
+  CELERY_RESULT_DB: "2"
+  CORS_ORIGINS: "https://hopeup.example.com"
+  ALLOWED_HOSTS: "hopeup.example.com,api.hopeup.example.com"
+  PROMETHEUS_METRICS: "true"
+  SENTRY_TRACES_SAMPLE_RATE: "0.1"
+  WORKER_CONCURRENCY: "8"
+  RATE_LIMIT_PER_MINUTE: "600"

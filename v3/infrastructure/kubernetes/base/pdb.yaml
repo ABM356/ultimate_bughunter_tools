@@ -1,0 +1,72 @@
+---
+# Prevent voluntary disruption (node drain, autoscaler eviction) from taking
+# the backend below 2 healthy pods.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: backend-pdb
+  namespace: hopeup
+  labels:
+    app: backend
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: backend
+      tier: api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+  namespace: hopeup
+  labels:
+    app: frontend
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: frontend
+      tier: web
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: worker-pdb
+  namespace: hopeup
+  labels:
+    app: worker
+spec:
+  minAvailable: 50%  # tolerate half being drained at once
+  selector:
+    matchLabels:
+      app: worker
+      tier: worker
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgres-pdb
+  namespace: hopeup
+  labels:
+    app: postgres
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: postgres
+      tier: data
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: elasticsearch-pdb
+  namespace: hopeup
+  labels:
+    app: elasticsearch
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+      tier: search

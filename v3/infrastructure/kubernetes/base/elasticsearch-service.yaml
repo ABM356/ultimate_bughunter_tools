@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-headless
+  namespace: hopeup
+  labels:
+    app: elasticsearch
+    tier: search
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true  # required for cluster discovery
+  selector:
+    app: elasticsearch
+    tier: search
+  ports:
+    - name: rest
+      port: 9200
+      targetPort: 9200
+    - name: transport
+      port: 9300
+      targetPort: 9300
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: hopeup
+  labels:
+    app: elasticsearch
+    tier: search
+spec:
+  type: ClusterIP
+  selector:
+    app: elasticsearch
+    tier: search
+  ports:
+    - name: rest
+      port: 9200
+      targetPort: 9200

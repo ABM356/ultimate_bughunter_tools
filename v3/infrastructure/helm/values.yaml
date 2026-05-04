@@ -1,0 +1,203 @@
+# Default values for the HopeUp chart.
+# Override per-environment with -f overrides.yaml.
+
+global:
+  domain: hopeup.example.com
+  imageRegistry: ghcr.io/hopeup
+  imagePullSecrets: []
+  storageClass: gp3
+
+# ----- Backend (FastAPI) -----
+backend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: ghcr.io/hopeup/backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
+  env:
+    LOG_LEVEL: info
+    ENVIRONMENT: production
+    WORKER_CONCURRENCY: "8"
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# ----- Frontend (Next.js) -----
+frontend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: ghcr.io/hopeup/frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+
+# ----- Worker (Celery) -----
+worker:
+  enabled: true
+  replicaCount: 5
+  image:
+    repository: ghcr.io/hopeup/backend
+    tag: latest
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 30
+    targetCPUUtilizationPercentage: 75
+
+# ----- Celery Beat (singleton) -----
+beat:
+  enabled: true
+  image:
+    repository: ghcr.io/hopeup/backend
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+# ----- Ingress -----
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+  tls:
+    enabled: true
+    secretName: hopeup-tls
+  hosts:
+    - host: hopeup.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: backend
+        - path: /ws
+          pathType: Prefix
+          service: backend
+        - path: /
+          pathType: Prefix
+          service: frontend
+
+# ----- Secrets (dummy values; override via secrets manager) -----
+secrets:
+  jwtSecret: REPLACE_ME
+  anthropicApiKey: REPLACE_ME
+  openaiApiKey: REPLACE_ME
+  stripeSecretKey: REPLACE_ME
+
+# ----- Bundled subcharts -----
+postgresql:
+  enabled: true
+  auth:
+    database: hopeup
+    username: hopeup
+    existingSecret: hopeup-secrets
+    secretKeys:
+      adminPasswordKey: POSTGRES_PASSWORD
+      userPasswordKey: POSTGRES_PASSWORD
+  primary:
+    persistence:
+      size: 100Gi
+      storageClass: gp3
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    existingSecret: hopeup-secrets
+    existingSecretPasswordKey: REDIS_PASSWORD
+  master:
+    persistence:
+      size: 10Gi
+      storageClass: gp3
+
+elasticsearch:
+  enabled: true
+  master:
+    replicaCount: 3
+    persistence:
+      size: 200Gi
+      storageClass: gp3
+  data:
+    replicaCount: 3
+  coordinating:
+    replicaCount: 0
+  ingest:
+    replicaCount: 0
+
+# Common pod security defaults
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]

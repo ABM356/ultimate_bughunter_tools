@@ -1,0 +1,64 @@
+# Runs `alembic upgrade head` to apply schema migrations.
+# Use as an Argo Rollouts pre-promotion analysis or as a Helm pre-install/pre-upgrade hook.
+# Job name includes a timestamp so re-applies don't conflict with completed jobs.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+  namespace: hopeup
+  labels:
+    app: backend
+    tier: migration
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400  # auto-clean after 1d
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app: backend
+        tier: migration
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: hopeup-backend
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          image: ghcr.io/hopeup/backend:latest
+          imagePullPolicy: IfNotPresent
+          command: ["alembic", "upgrade", "head"]
+          envFrom:
+            - configMapRef:
+                name: hopeup-config
+            - secretRef:
+                name: hopeup-secrets
+          env:
+            - name: DATABASE_URL
+              # Sync driver for Alembic (uses psycopg2)
+              value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

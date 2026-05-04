@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: hopeup
+  labels:
+    app: worker
+    tier: worker
+    version: v1
+spec:
+  replicas: 5
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: worker
+      tier: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+        tier: worker
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9540"  # celery-exporter sidecar (not included)
+    spec:
+      serviceAccountName: hopeup-backend
+      terminationGracePeriodSeconds: 120  # let in-flight tasks finish
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: worker
+          image: ghcr.io/hopeup/backend:latest
+          imagePullPolicy: IfNotPresent
+          command: ["celery"]
+          args:
+            - "-A"
+            - "app.tasks.celery_app"
+            - "worker"
+            - "--loglevel=info"
+            - "--concurrency=8"
+            - "-Q"
+            - "default,scans,reports,notifications"
+            - "--max-tasks-per-child=200"  # mitigate memory leaks
+          envFrom:
+            - configMapRef:
+                name: hopeup-config
+            - secretRef:
+                name: hopeup-secrets
+          env:
+            - name: DATABASE_URL
+              value: "postgresql+asyncpg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+            - name: REDIS_URL
+              value: "redis://:$(REDIS_PASSWORD)@$(REDIS_HOST):$(REDIS_PORT)/0"
+            - name: CELERY_BROKER_URL
+              value: "redis://:$(REDIS_PASSWORD)@$(REDIS_HOST):$(REDIS_PORT)/$(CELERY_BROKER_DB)"
+            - name: CELERY_RESULT_BACKEND
+              value: "redis://:$(REDIS_PASSWORD)@$(REDIS_HOST):$(REDIS_PORT)/$(CELERY_RESULT_DB)"
+            - name: ELASTICSEARCH_URL
+              value: "http://$(ELASTICSEARCH_USERNAME):$(ELASTICSEARCH_PASSWORD)@$(ELASTICSEARCH_HOST):$(ELASTICSEARCH_PORT)"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          livenessProbe:
+            exec:
+              # celery inspect ping returns "pong" from a healthy worker
+              command: ["sh", "-c", "celery -A app.tasks.celery_app inspect ping -d celery@$HOSTNAME"]
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "celery -A app.tasks.celery_app inspect ping -d celery@$HOSTNAME"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              # SIGTERM signals warm shutdown; Celery finishes current tasks
+              exec:
+                command: ["sh", "-c", "celery -A app.tasks.celery_app control shutdown || sleep 90"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

@@ -1,0 +1,101 @@
+# Production override for docker-compose.yml
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Key differences from local dev:
+#   - Database/redis ports are NOT exposed to the host
+#   - restart: always for resiliency
+#   - No volume bind-mounts (uses image content)
+#   - Tighter resource limits
+version: "3.9"
+
+services:
+  postgres:
+    restart: always
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  redis:
+    restart: always
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  elasticsearch:
+    restart: always
+    # Elasticsearch is internal only in production; expose via VPC peering instead.
+    ports: []
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+
+  kibana:
+    restart: always
+    # Kibana protected behind a VPN gateway in production.
+
+  backend:
+    restart: always
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+    volumes: []
+    environment:
+      ENVIRONMENT: production
+      LOG_LEVEL: info
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+
+  worker:
+    restart: always
+    command: ["celery", "-A", "app.tasks.celery_app", "worker", "--loglevel=info", "--concurrency=8"]
+    volumes: []
+    deploy:
+      replicas: 5
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  beat:
+    restart: always
+    volumes: []
+    deploy:
+      replicas: 1  # Beat must be a singleton
+
+  frontend:
+    restart: always
+    command: ["npm", "run", "start"]
+    volumes: []
+    environment:
+      NODE_ENV: production
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M

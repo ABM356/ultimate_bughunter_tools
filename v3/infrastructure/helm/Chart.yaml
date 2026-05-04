@@ -1,0 +1,33 @@
+apiVersion: v2
+name: hopeup
+description: HopeUp Security Platform - enterprise cybersecurity SaaS
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - security
+  - cybersecurity
+  - saas
+  - hopeup
+home: https://hopeup.example.com
+sources:
+  - https://github.com/HopeUp/hopeup-platform
+maintainers:
+  - name: HopeUp Platform Team
+    email: platform@hopeup.example.com
+icon: https://hopeup.example.com/logo.png
+
+# External dependencies. Override values via the dependency block in values.yaml.
+dependencies:
+  - name: postgresql
+    version: 13.4.3
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: 18.19.4
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: elasticsearch
+    version: 19.21.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: elasticsearch.enabled

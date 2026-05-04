@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0a0a0f;
+  --bg-secondary: #0f0f15;
+  --panel: #111118;
+  --panel-hover: #16161f;
+  --border: #222;
+  --border-strong: #2a2a35;
+  --accent: #00d4ff;
+  --accent-hover: #33dfff;
+  --sev-critical: #ff1744;
+  --sev-high: #ff6b35;
+  --sev-medium: #ffc400;
+  --sev-low: #2979ff;
+  --sev-info: #00c853;
+  --fg: #e6e6ee;
+  --fg-muted: #8a8a99;
+  --fg-subtle: #5a5a6a;
+}
+
+@layer base {
+  html,
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: rgba(0, 212, 255, 0.2);
+    color: var(--accent);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--fg-subtle);
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-panel border border-border rounded-lg;
+  }
+
+  .panel-hover {
+    @apply hover:bg-panel-hover transition-colors;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-bg hover:bg-accent-hover;
+  }
+
+  .btn-secondary {
+    @apply btn bg-panel border border-border text-fg hover:bg-panel-hover hover:border-border-strong;
+  }
+
+  .btn-ghost {
+    @apply btn text-fg-muted hover:text-fg hover:bg-panel-hover;
+  }
+
+  .btn-danger {
+    @apply btn bg-sev-critical text-white hover:opacity-90;
+  }
+
+  .input {
+    @apply w-full bg-bg-secondary border border-border rounded-md px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent;
+  }
+
+  .label {
+    @apply block text-xs font-medium text-fg-muted mb-1.5 uppercase tracking-wide;
+  }
+
+  .table-row {
+    @apply border-b border-border hover:bg-panel-hover transition-colors;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .grid-bg {
+    background-image: linear-gradient(rgba(34, 34, 34, 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 34, 34, 0.4) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}

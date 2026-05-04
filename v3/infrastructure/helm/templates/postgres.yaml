@@ -1,0 +1,31 @@
+{{/*
+PostgreSQL is provisioned via the Bitnami subchart (see Chart.yaml dependencies).
+This file holds the secret + connection helper that the backend reads.
+*/}}
+{{- if .Values.postgresql.enabled -}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "hopeup.fullname" . }}-secrets
+  labels:
+    {{- include "hopeup.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  POSTGRES_USER: {{ .Values.postgresql.auth.username | quote }}
+  POSTGRES_PASSWORD: {{ .Values.secrets.postgresPassword | default "REPLACE_ME_STRONG" | quote }}
+  POSTGRES_DB: {{ .Values.postgresql.auth.database | quote }}
+  POSTGRES_HOST: {{ printf "%s-postgresql" .Release.Name | quote }}
+  POSTGRES_PORT: "5432"
+  REDIS_HOST: {{ printf "%s-redis-master" .Release.Name | quote }}
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: {{ .Values.secrets.redisPassword | default "REPLACE_ME_STRONG" | quote }}
+  ELASTICSEARCH_HOST: {{ printf "%s-elasticsearch" .Release.Name | quote }}
+  ELASTICSEARCH_PORT: "9200"
+  ELASTICSEARCH_USERNAME: "elastic"
+  ELASTICSEARCH_PASSWORD: {{ .Values.secrets.elasticsearchPassword | default "REPLACE_ME_STRONG" | quote }}
+  JWT_SECRET: {{ .Values.secrets.jwtSecret | quote }}
+  ANTHROPIC_API_KEY: {{ .Values.secrets.anthropicApiKey | quote }}
+  OPENAI_API_KEY: {{ .Values.secrets.openaiApiKey | quote }}
+  STRIPE_SECRET_KEY: {{ .Values.secrets.stripeSecretKey | quote }}
+{{- end }}
