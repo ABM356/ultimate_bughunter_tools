@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}HopeUp — Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="card-grid">
+    <div class="card">
+        <h3>Total Tools</h3>
+        <div class="big-num">{{ tool_counts.total }}</div>
+        <div class="sub">Offensive + Defensive</div>
+    </div>
+    <div class="card">
+        <h3 style="color:#ff1744;">Red Team</h3>
+        <div class="big-num" style="color:#ff1744;">{{ tool_counts.red_team }}</div>
+        <div class="sub">Offensive tools</div>
+    </div>
+    <div class="card">
+        <h3 style="color:#2979ff;">Blue Team</h3>
+        <div class="big-num" style="color:#2979ff;">{{ tool_counts.blue_team }}</div>
+        <div class="sub">Defensive tools</div>
+    </div>
+    <div class="card">
+        <h3 style="color:#aa00ff;">Shared</h3>
+        <div class="big-num" style="color:#aa00ff;">{{ tool_counts.shared }}</div>
+        <div class="sub">Dual-use tools</div>
+    </div>
+</div>
+
+<div class="card-grid">
+    {% for tier in tiers %}
+    <div class="card">
+        <h3>Tier {{ tier.tier }}</h3>
+        <div style="font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:0.5rem;">{{ tier.name }}</div>
+        <div class="sub">{{ tier.description[:80] }}...</div>
+        <div style="margin-top:0.75rem;">
+            <span class="badge badge-yellow">{{ tier.label }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+    <div class="card">
+        <h3>Quick Actions</h3>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.5rem;">
+            <a href="{{ url_for('new_assessment') }}" class="btn btn-primary" style="text-align:center;">New Assessment</a>
+            <a href="{{ url_for('new_client') }}" class="btn btn-ghost" style="text-align:center;">Add Client</a>
+            <a href="{{ url_for('new_invoice') }}" class="btn btn-ghost" style="text-align:center;">Create Invoice</a>
+            <a href="{{ url_for('training') }}" class="btn btn-ghost" style="text-align:center;">Training Modules</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Recent Assessments</h3>
+        {% if recent_assessments %}
+        <table style="width:100%;margin-top:0.5rem;">
+            {% for a in recent_assessments %}
+            <tr>
+                <td style="padding:0.4rem 0;">
+                    <a href="{{ url_for('view_assessment', assessment_id=a.id) }}" style="color:#00d4ff;text-decoration:none;">{{ a.id }}</a>
+                </td>
+                <td style="color:#7f8c8d;">{{ a.target }}</td>
+                <td><span class="badge badge-yellow">T{{ a.tier }}</span></td>
+                <td><span class="status-{{ a.status }}">{{ a.status }}</span></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p style="color:#555;margin-top:1rem;">No assessments yet. <a href="{{ url_for('new_assessment') }}" style="color:#00d4ff;text-decoration:none;">Start one</a>.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

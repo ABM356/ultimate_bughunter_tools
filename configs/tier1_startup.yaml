@@ -1,0 +1,77 @@
+# ─────────────────────────────────────────────────────────────
+# TIER 1 — STARTUP / SMALL BUSINESS
+# Basic security assessment for web-facing applications
+# ─────────────────────────────────────────────────────────────
+
+tier: 1
+name: "Startup / Small Business"
+label: "TIER-1-STARTER"
+
+scan_profile:
+  depth: surface
+  max_duration_hours: 2
+  concurrent_tools: 3
+  rate_limit: conservative
+  threads_per_tool: 5
+  delay_between_requests_ms: 200
+
+# Red Team — Offensive Scans
+red_team:
+  phases:
+    - name: "Reconnaissance"
+      tools:
+        - subfinder
+        - assetfinder
+        - dnsx
+        - httpx
+      timeout_minutes: 15
+
+    - name: "Vulnerability Scanning"
+      tools:
+        - nuclei
+        - nikto
+      timeout_minutes: 30
+      nuclei_severity: "critical,high"
+
+    - name: "Web Testing"
+      tools:
+        - ffuf
+        - dirsearch
+        - sqlmap
+        - xsstrike
+      timeout_minutes: 30
+
+    - name: "SSL/TLS Check"
+      tools:
+        - testssl
+      timeout_minutes: 10
+
+    - name: "Default Credentials"
+      tools:
+        - changeme
+      timeout_minutes: 10
+
+# Blue Team — Defensive Checks
+blue_team:
+  phases:
+    - name: "Host Hardening Audit"
+      tools:
+        - lynis
+      timeout_minutes: 15
+
+    - name: "Secrets Detection"
+      tools:
+        - gitleaks
+        - detect-secrets
+      timeout_minutes: 10
+
+# Report Configuration
+report:
+  format: html
+  sections:
+    - executive_summary
+    - vulnerability_findings
+    - risk_ratings
+    - remediation_steps
+  severity_threshold: low
+  include_raw_output: false

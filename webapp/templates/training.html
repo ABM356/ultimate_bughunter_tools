@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}HopeUp — Training{% endblock %}
+{% block heading %}Training Academy{% endblock %}
+
+{% block content %}
+<div class="card-grid" style="margin-bottom:2rem;">
+    <div class="card" style="border-top:3px solid #ff1744;">
+        <h3 style="color:#ff1744;">Red Team Track</h3>
+        <div class="big-num">{{ paths.red|length }}</div>
+        <div class="sub">Offensive security modules</div>
+        <div style="margin-top:0.75rem;color:#7f8c8d;font-size:0.85rem;">
+            BH-101 → BH-102 → BH-201 → BH-202 → BH-301 → BH-302
+        </div>
+    </div>
+    <div class="card" style="border-top:3px solid #2979ff;">
+        <h3 style="color:#2979ff;">Blue Team Track</h3>
+        <div class="big-num">{{ paths.blue|length }}</div>
+        <div class="sub">Defensive security modules</div>
+        <div style="margin-top:0.75rem;color:#7f8c8d;font-size:0.85rem;">
+            BD-101 → BD-201 → BD-301
+        </div>
+    </div>
+    <div class="card" style="border-top:3px solid #00c853;">
+        <h3 style="color:#00c853;">Deployment Track</h3>
+        <div class="big-num">{{ paths.deployment|length }}</div>
+        <div class="sub">Platform deployment guide</div>
+        <div style="margin-top:0.75rem;color:#7f8c8d;font-size:0.85rem;">
+            DP-101
+        </div>
+    </div>
+</div>
+
+{% for code, module in curriculum.items() %}
+<div class="card" style="margin-bottom:1rem;border-left:3px solid {% if module.track == 'red' %}#ff1744{% elif module.track == 'blue' %}#2979ff{% else %}#00c853{% endif %};">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+                <span style="color:#00d4ff;font-weight:700;font-size:1.1rem;">{{ code }}</span>
+                <span class="badge {% if module.level == 'beginner' %}badge-green{% elif module.level == 'intermediate' %}badge-yellow{% else %}badge-red{% endif %}">
+                    {{ module.level }}
+                </span>
+                <span class="badge {% if module.track == 'red' %}badge-red{% elif module.track == 'blue' %}badge-blue{% else %}badge-green{% endif %}">
+                    {{ module.track }}
+                </span>
+            </div>
+            <h3 style="color:#fff;font-size:1.1rem;margin-bottom:0.5rem;text-transform:none;letter-spacing:0;">{{ module.title }}</h3>
+            <p style="color:#7f8c8d;margin-bottom:0.75rem;">{{ module.description }}</p>
+        </div>
+        <div style="text-align:right;white-space:nowrap;">
+            <div style="color:#00d4ff;font-weight:600;">{{ module.duration_hours }}h</div>
+            <div style="color:#555;font-size:0.75rem;">duration</div>
+        </div>
+    </div>
+
+    {% if module.prerequisites %}
+    <div style="margin-bottom:0.75rem;">
+        <span style="color:#7f8c8d;font-size:0.8rem;">Prerequisites: </span>
+        {% for prereq in module.prerequisites %}
+        <span class="badge badge-purple">{{ prereq }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="margin-top:0.5rem;">
+        {% for mod in module.modules %}
+        <div style="padding:0.5rem 0.75rem;margin:0.25rem 0;background:rgba(255,255,255,0.02);border-radius:6px;">
+            <div style="color:#ccc;font-weight:500;">{{ mod.title }}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.25rem;margin-top:0.25rem;">
+                {% for topic in mod.topics[:3] %}
+                <span style="color:#555;font-size:0.8rem;">{{ topic }}{% if not loop.last %} · {% endif %}</span>
+                {% endfor %}
+                {% if mod.topics|length > 3 %}
+                <span style="color:#555;font-size:0.8rem;">+{{ mod.topics|length - 3 }} more</span>
+                {% endif %}
+            </div>
+            {% if mod.lab %}
+            <div style="margin-top:0.25rem;">
+                <span class="badge badge-green" style="font-size:0.6rem;">LAB: {{ mod.lab.name }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

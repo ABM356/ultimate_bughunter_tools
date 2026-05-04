@@ -1,0 +1,180 @@
+# ─────────────────────────────────────────────────────────────
+# TIER 3 — ENTERPRISE
+# Deep security assessment for complex enterprise infrastructure
+# ─────────────────────────────────────────────────────────────
+
+tier: 3
+name: "Enterprise"
+label: "TIER-3-ENTERPRISE"
+
+scan_profile:
+  depth: deep
+  max_duration_hours: 24
+  concurrent_tools: 10
+  rate_limit: aggressive
+  threads_per_tool: 20
+  delay_between_requests_ms: 50
+
+red_team:
+  phases:
+    - name: "Full Subdomain Enumeration"
+      tools: ALL_TIER_3
+      categories: [recon_subdomain]
+      timeout_minutes: 45
+
+    - name: "Complete DNS Reconnaissance"
+      tools: ALL_TIER_3
+      categories: [recon_dns]
+      timeout_minutes: 30
+
+    - name: "HTTP Probing & Visual Recon"
+      tools: ALL_TIER_3
+      categories: [recon_http, recon_screenshot]
+      timeout_minutes: 30
+
+    - name: "Deep Crawling & Parameter Mining"
+      tools: ALL_TIER_3
+      categories: [recon_crawl]
+      timeout_minutes: 45
+
+    - name: "Comprehensive Port Scanning"
+      tools: ALL_TIER_3
+      categories: [recon_ports]
+      timeout_minutes: 30
+
+    - name: "Full OSINT Sweep"
+      tools: ALL_TIER_3
+      categories: [recon_osint]
+      timeout_minutes: 30
+
+    - name: "Multi-Engine Vulnerability Scanning"
+      tools: ALL_TIER_3
+      categories: [vuln_scanning]
+      timeout_minutes: 90
+      nuclei_severity: "critical,high,medium,low"
+
+    - name: "Complete Web Application Testing"
+      tools: ALL_TIER_3
+      categories: [web_sqli, web_xss, web_ssrf, web_xxe, web_lfi, web_cors, web_jwt, web_cmdi, web_deserialization]
+      timeout_minutes: 120
+
+    - name: "Exhaustive Directory Discovery"
+      tools: ALL_TIER_3
+      categories: [brute_dir]
+      timeout_minutes: 45
+
+    - name: "Credential & Password Attacks"
+      tools: ALL_TIER_3
+      categories: [brute_password]
+      timeout_minutes: 30
+
+    - name: "Exploitation Framework Scans"
+      tools: ALL_TIER_3
+      categories: [exploit]
+      timeout_minutes: 30
+
+    - name: "Network Testing"
+      tools: ALL_TIER_3
+      categories: [network]
+      timeout_minutes: 30
+
+    - name: "Cloud Offensive Security"
+      tools: ALL_TIER_3
+      categories: [cloud_offensive, cloud_s3]
+      timeout_minutes: 45
+
+    - name: "Mobile Application Security"
+      tools: ALL_TIER_3
+      categories: [mobile]
+      timeout_minutes: 45
+
+    - name: "Subdomain Takeover Testing"
+      tools: ALL_TIER_3
+      categories: [takeover]
+      timeout_minutes: 20
+
+    - name: "Git & Source Code Recon"
+      tools: ALL_TIER_3
+      categories: [git_recon, dorking]
+      timeout_minutes: 20
+
+    - name: "SSL/TLS Deep Analysis"
+      tools: ALL_TIER_3
+      categories: [ssl_tls]
+      timeout_minutes: 20
+
+blue_team:
+  phases:
+    - name: "Full Host Hardening Audit"
+      tools: ALL_TIER_3
+      categories: [hardening]
+      timeout_minutes: 30
+
+    - name: "Secrets Detection Sweep"
+      tools: ALL_TIER_3
+      categories: [secrets_detection]
+      timeout_minutes: 20
+
+    - name: "IDS/IPS Configuration"
+      tools: ALL_TIER_3
+      categories: [ids_ips]
+      timeout_minutes: 30
+
+    - name: "SIEM & Log Analysis"
+      tools: ALL_TIER_3
+      categories: [siem]
+      timeout_minutes: 30
+
+    - name: "Forensics Readiness"
+      tools: ALL_TIER_3
+      categories: [forensics]
+      timeout_minutes: 30
+
+    - name: "Threat Intelligence"
+      tools: ALL_TIER_3
+      categories: [threat_intel]
+      timeout_minutes: 20
+
+    - name: "Container Security Audit"
+      tools: ALL_TIER_3
+      categories: [container_security]
+      timeout_minutes: 20
+
+    - name: "Cloud Defensive Security"
+      tools: ALL_TIER_3
+      categories: [cloud_defensive]
+      timeout_minutes: 30
+
+    - name: "Network Monitoring Setup"
+      tools: ALL_TIER_3
+      categories: [network_monitoring]
+      timeout_minutes: 20
+
+    - name: "WAF Configuration Review"
+      tools: ALL_TIER_3
+      categories: [waf]
+      timeout_minutes: 20
+
+compliance:
+  - OWASP_TOP_10
+  - PCI_DSS
+  - SOC2
+  - HIPAA
+  - ISO_27001
+
+report:
+  format: html
+  sections:
+    - executive_summary
+    - vulnerability_findings
+    - risk_ratings
+    - attack_surface_map
+    - attack_chain_analysis
+    - remediation_steps
+    - compliance_checklist
+    - threat_modeling
+    - retesting_recommendations
+    - blue_team_recommendations
+  severity_threshold: info
+  include_raw_output: true
+  include_evidence_screenshots: true

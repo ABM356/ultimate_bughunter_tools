@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}HopeUp — Business Tiers{% endblock %}
+{% block heading %}Business Tiers{% endblock %}
+
+{% block content %}
+<div class="card-grid">
+    {% for num, tier in tiers.items() %}
+    <div class="card" style="border-top: 3px solid {% if num == 1 %}#00c853{% elif num == 2 %}#ffc400{% elif num == 3 %}#ff6d00{% else %}#ff1744{% endif %};">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>Tier {{ num }}</h3>
+            <span class="badge badge-yellow">{{ tier.label }}</span>
+        </div>
+        <div style="font-size:1.2rem;font-weight:600;color:#fff;margin:0.75rem 0 0.5rem;">{{ tier.name }}</div>
+        <p style="color:#7f8c8d;font-size:0.9rem;margin-bottom:1rem;">{{ tier.description }}</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:1rem;">
+            <div style="text-align:center;padding:0.5rem;background:rgba(255,255,255,0.03);border-radius:6px;">
+                <div style="font-size:1.3rem;font-weight:700;color:#fff;">{{ tier.tool_count }}</div>
+                <div style="font-size:0.65rem;color:#7f8c8d;text-transform:uppercase;">Total</div>
+            </div>
+            <div style="text-align:center;padding:0.5rem;background:rgba(255,23,68,0.05);border-radius:6px;">
+                <div style="font-size:1.3rem;font-weight:700;color:#ff1744;">{{ tier.red_count }}</div>
+                <div style="font-size:0.65rem;color:#7f8c8d;text-transform:uppercase;">Red</div>
+            </div>
+            <div style="text-align:center;padding:0.5rem;background:rgba(41,121,255,0.05);border-radius:6px;">
+                <div style="font-size:1.3rem;font-weight:700;color:#2979ff;">{{ tier.blue_count }}</div>
+                <div style="font-size:0.65rem;color:#7f8c8d;text-transform:uppercase;">Blue</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:0.75rem;">
+            <div style="color:#7f8c8d;font-size:0.75rem;text-transform:uppercase;margin-bottom:0.3rem;">Target Audience</div>
+            {% for audience in tier.target_audience %}
+            <div style="font-size:0.85rem;color:#ccc;">• {{ audience }}</div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-bottom:0.75rem;">
+            <div style="color:#7f8c8d;font-size:0.75rem;text-transform:uppercase;margin-bottom:0.3rem;">Scan Profile</div>
+            <div style="font-size:0.85rem;color:#ccc;">
+                Depth: {{ tier.scan_profile.depth }} |
+                Max: {{ tier.scan_profile.max_duration_hours }}h |
+                Rate: {{ tier.scan_profile.rate_limit }}
+            </div>
+        </div>
+
+        {% if tier.compliance %}
+        <div>
+            <div style="color:#7f8c8d;font-size:0.75rem;text-transform:uppercase;margin-bottom:0.3rem;">Compliance</div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
+                {% for c in tier.compliance %}
+                <span class="badge badge-blue" style="font-size:0.6rem;">{{ c.replace('_', ' ') }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

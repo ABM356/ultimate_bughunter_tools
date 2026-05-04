@@ -1,0 +1,189 @@
+# ─────────────────────────────────────────────────────────────
+# TIER 2 — MID-SIZE BUSINESS
+# Comprehensive security testing for growing companies
+# ─────────────────────────────────────────────────────────────
+
+tier: 2
+name: "Mid-size Business"
+label: "TIER-2-BUSINESS"
+
+scan_profile:
+  depth: moderate
+  max_duration_hours: 8
+  concurrent_tools: 5
+  rate_limit: moderate
+  threads_per_tool: 10
+  delay_between_requests_ms: 100
+
+# Red Team — Full Offensive Assessment
+red_team:
+  phases:
+    - name: "Subdomain Enumeration"
+      tools:
+        - amass
+        - subfinder
+        - assetfinder
+        - findomain
+        - knockpy
+        - sublist3r
+        - crtndstry
+      timeout_minutes: 30
+
+    - name: "DNS Reconnaissance"
+      tools:
+        - dnsx
+        - massdns
+        - dnscan
+        - dnsrecon
+      timeout_minutes: 20
+
+    - name: "HTTP Probing & Screenshotting"
+      tools:
+        - httpx
+        - httprobe
+        - eyewitness
+        - aquatone
+        - gowitness
+      timeout_minutes: 20
+
+    - name: "URL & Parameter Discovery"
+      tools:
+        - katana
+        - gau
+        - waybackurls
+        - photon
+        - jsparser
+        - arjun
+        - paramspider
+      timeout_minutes: 30
+
+    - name: "Port Scanning"
+      tools:
+        - naabu
+        - masscan
+        - rustscan
+      timeout_minutes: 20
+
+    - name: "OSINT & Intelligence"
+      tools:
+        - theHarvester
+        - datasploit
+        - asnlookup
+        - gitrob
+        - git-secrets
+        - trufflehog
+      timeout_minutes: 20
+
+    - name: "Vulnerability Scanning"
+      tools:
+        - nuclei
+        - nikto
+        - wpscan
+        - cmsmap
+        - retire_js
+        - trivy
+      timeout_minutes: 45
+      nuclei_severity: "critical,high,medium"
+
+    - name: "Web Application Testing"
+      tools:
+        - sqlmap
+        - xsstrike
+        - dalfox
+        - ssrfdetector
+        - xxeinjector
+        - lfisuite
+        - corstest
+        - jwt_tool
+        - commix
+      timeout_minutes: 60
+
+    - name: "Directory Brute-Forcing"
+      tools:
+        - ffuf
+        - feroxbuster
+        - gobuster
+        - dirsearch
+        - wfuzz
+        - bfac
+      timeout_minutes: 30
+
+    - name: "Credential Testing"
+      tools:
+        - hydra
+        - changeme
+      timeout_minutes: 20
+
+    - name: "Subdomain Takeover"
+      tools:
+        - tko-subs
+        - subjack
+        - hostilesubbruteforcer
+      timeout_minutes: 15
+
+    - name: "S3 & Cloud Buckets"
+      tools:
+        - lazys3
+        - teh_s3_bucketeers
+      timeout_minutes: 15
+
+    - name: "Git Reconnaissance"
+      tools:
+        - gittools
+      timeout_minutes: 15
+
+    - name: "SSL/TLS Analysis"
+      tools:
+        - testssl
+        - sslyze
+      timeout_minutes: 15
+
+    - name: "Automation Pipeline"
+      tools:
+        - lazyrecon
+        - reconftw
+      timeout_minutes: 30
+
+# Blue Team — Defensive Assessment
+blue_team:
+  phases:
+    - name: "Host Hardening"
+      tools:
+        - lynis
+        - linux_exploit_suggester
+      timeout_minutes: 20
+
+    - name: "Secrets Detection"
+      tools:
+        - gitleaks
+        - detect-secrets
+      timeout_minutes: 15
+
+    - name: "IDS Configuration Check"
+      tools:
+        - suricata
+      timeout_minutes: 15
+
+    - name: "SIEM Readiness"
+      tools:
+        - wazuh
+        - ossec
+      timeout_minutes: 20
+
+# Compliance Mapping
+compliance:
+  - OWASP_TOP_10
+  - PCI_DSS_BASIC
+
+report:
+  format: html
+  sections:
+    - executive_summary
+    - vulnerability_findings
+    - risk_ratings
+    - attack_surface_map
+    - remediation_steps
+    - compliance_checklist
+    - retesting_recommendations
+  severity_threshold: info
+  include_raw_output: true

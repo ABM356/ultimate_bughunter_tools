@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}HopeUp — Invoices{% endblock %}
+{% block heading %}Invoices & Payments{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+    <p style="color:#7f8c8d;">{{ invoices|length }} invoice(s)</p>
+    <a href="{{ url_for('new_invoice') }}" class="btn btn-primary">Create Invoice</a>
+</div>
+
+{% if invoices %}
+<div class="card-grid" style="margin-bottom:1.5rem;">
+    {% set total_revenue = namespace(val=0) %}
+    {% set paid_count = namespace(val=0) %}
+    {% set pending_count = namespace(val=0) %}
+    {% for iid, inv in invoices.items() %}
+        {% if inv.status == 'paid' %}
+            {% set total_revenue.val = total_revenue.val + inv.amount %}
+            {% set paid_count.val = paid_count.val + 1 %}
+        {% else %}
+            {% set pending_count.val = pending_count.val + 1 %}
+        {% endif %}
+    {% endfor %}
+    <div class="card">
+        <h3>Total Revenue</h3>
+        <div class="big-num" style="color:#00c853;">${{ "%.2f"|format(total_revenue.val) }}</div>
+        <div class="sub">From paid invoices</div>
+    </div>
+    <div class="card">
+        <h3>Paid</h3>
+        <div class="big-num" style="color:#00c853;">{{ paid_count.val }}</div>
+        <div class="sub">Completed payments</div>
+    </div>
+    <div class="card">
+        <h3>Pending</h3>
+        <div class="big-num" style="color:#ffc400;">{{ pending_count.val }}</div>
+        <div class="sub">Awaiting payment</div>
+    </div>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Invoice ID</th>
+            <th>Client</th>
+            <th>Assessment</th>
+            <th>Tier</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for iid, inv in invoices.items() %}
+        <tr>
+            <td style="color:#00d4ff;">{{ iid }}</td>
+            <td style="color:#fff;">{{ inv.client_name or '—' }}</td>
+            <td style="color:#7f8c8d;">{{ inv.assessment_id or '—' }}</td>
+            <td><span class="badge badge-yellow">T{{ inv.tier }}</span></td>
+            <td style="color:#fff;font-weight:600;">${{ "%.2f"|format(inv.amount) }} {{ inv.currency }}</td>
+            <td>
+                {% if inv.status == 'paid' %}
+                <span class="badge badge-green">PAID</span>
+                {% else %}
+                <span class="badge badge-yellow">PENDING</span>
+                {% endif %}
+            </td>
+            <td style="color:#7f8c8d;">{{ inv.created_at[:10] }}</td>
+            <td>
+                {% if inv.status != 'paid' %}
+                <form method="POST" action="{{ url_for('pay_invoice', invoice_id=iid) }}" style="display:inline;">
+                    <input type="hidden" name="payment_method" value="manual">
+                    <button type="submit" class="btn btn-primary btn-sm">Mark Paid</button>
+                </form>
+                <form method="POST" action="{{ url_for('pay_invoice', invoice_id=iid) }}" style="display:inline;margin-left:0.25rem;">
+                    <input type="hidden" name="payment_method" value="stripe">
+                    <button type="submit" class="btn btn-ghost btn-sm">Pay via Stripe</button>
+                </form>
+                {% else %}
+                <span style="color:#555;">{{ inv.get('paid_at', '')[:10] }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="card" style="text-align:center;padding:3rem;">
+    <p style="color:#555;font-size:1.1rem;margin-bottom:1rem;">No invoices yet</p>
+    <a href="{{ url_for('new_invoice') }}" class="btn btn-primary">Create Your First Invoice</a>
+</div>
+{% endif %}
+{% endblock %}

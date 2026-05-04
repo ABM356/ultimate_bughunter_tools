@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}HopeUp — Tools Registry{% endblock %}
+{% block heading %}Tool Registry{% endblock %}
+
+{% block content %}
+<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;">
+    <a href="{{ url_for('tools') }}" class="btn {% if not team_filter %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">All</a>
+    <a href="{{ url_for('tools', team='red') }}" class="btn {% if team_filter == 'red' %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">Red Team</a>
+    <a href="{{ url_for('tools', team='blue') }}" class="btn {% if team_filter == 'blue' %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">Blue Team</a>
+    <span style="margin-left:1rem;color:#555;">|</span>
+    <a href="{{ url_for('tools', tier=1) }}" class="btn {% if tier_filter == 1 %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">Tier 1</a>
+    <a href="{{ url_for('tools', tier=2) }}" class="btn {% if tier_filter == 2 %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">Tier 2</a>
+    <a href="{{ url_for('tools', tier=3) }}" class="btn {% if tier_filter == 3 %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">Tier 3</a>
+    <a href="{{ url_for('tools', tier=4) }}" class="btn {% if tier_filter == 4 %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">Tier 4</a>
+</div>
+
+<p style="color:#7f8c8d;margin-bottom:1rem;">{{ tools|length }} tools displayed</p>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Team</th>
+            <th>Tier</th>
+            <th>Tool</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Install</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for name, tool in tools|sort(attribute='1.category') %}
+        <tr>
+            <td>
+                {% if tool.team == 'red' %}<span class="badge badge-red">RED</span>
+                {% elif tool.team == 'blue' %}<span class="badge badge-blue">BLUE</span>
+                {% else %}<span class="badge badge-purple">BOTH</span>{% endif %}
+            </td>
+            <td><span class="badge badge-yellow">T{{ tool.tier }}</span></td>
+            <td style="color:#fff;font-weight:500;">{{ name }}</td>
+            <td style="color:#7f8c8d;">{{ tool.category }}</td>
+            <td>{{ tool.description[:60] }}</td>
+            <td style="color:#555;">{{ tool.install }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

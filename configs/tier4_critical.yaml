@@ -1,0 +1,146 @@
+# ─────────────────────────────────────────────────────────────
+# TIER 4 — CRITICAL INFRASTRUCTURE / GOVERNMENT
+# Maximum-depth assessment — all tools, full attack simulation
+# ─────────────────────────────────────────────────────────────
+
+tier: 4
+name: "Critical Infrastructure / Government"
+label: "TIER-4-CRITICAL"
+
+scan_profile:
+  depth: maximum
+  max_duration_hours: 72
+  concurrent_tools: 15
+  rate_limit: full
+  threads_per_tool: 30
+  delay_between_requests_ms: 0
+
+red_team:
+  strategy: "full_red_team_simulation"
+  phases:
+    - name: "Phase 1 — Passive Reconnaissance"
+      description: "Gather intelligence without touching target systems"
+      tools: ALL
+      categories: [recon_subdomain, recon_dns, recon_osint, dorking, recon_crawl]
+      timeout_minutes: 120
+
+    - name: "Phase 2 — Active Reconnaissance"
+      description: "Probe target systems for services, technologies, and attack surface"
+      tools: ALL
+      categories: [recon_http, recon_ports, recon_screenshot, recon_crawl]
+      timeout_minutes: 90
+
+    - name: "Phase 3 — Vulnerability Discovery"
+      description: "Systematic vulnerability identification across all vectors"
+      tools: ALL
+      categories: [vuln_scanning, ssl_tls]
+      timeout_minutes: 180
+      nuclei_severity: "critical,high,medium,low,info"
+      nuclei_templates: "all"
+
+    - name: "Phase 4 — Web Application Exploitation"
+      description: "Attempt exploitation of all discovered web vulnerabilities"
+      tools: ALL
+      categories: [web_sqli, web_xss, web_ssrf, web_xxe, web_lfi, web_cors, web_jwt, web_cmdi, web_deserialization]
+      timeout_minutes: 240
+
+    - name: "Phase 5 — Infrastructure Exploitation"
+      description: "Network-level attacks, credential testing, and service exploitation"
+      tools: ALL
+      categories: [brute_dir, brute_password, exploit, network]
+      timeout_minutes: 180
+
+    - name: "Phase 6 — Cloud & Container Testing"
+      description: "Cloud infrastructure attacks and container escape testing"
+      tools: ALL
+      categories: [cloud_offensive, cloud_s3, mobile]
+      timeout_minutes: 120
+
+    - name: "Phase 7 — Persistence & Lateral Movement Checks"
+      description: "Verify if persistence mechanisms or lateral movement is possible"
+      tools: ALL
+      categories: [takeover, git_recon]
+      timeout_minutes: 60
+
+blue_team:
+  strategy: "full_defensive_audit"
+  phases:
+    - name: "Complete System Hardening Audit"
+      tools: ALL
+      categories: [hardening]
+      timeout_minutes: 60
+
+    - name: "Full Secrets & Credential Scan"
+      tools: ALL
+      categories: [secrets_detection]
+      timeout_minutes: 30
+
+    - name: "IDS/IPS Effectiveness Testing"
+      tools: ALL
+      categories: [ids_ips]
+      timeout_minutes: 60
+
+    - name: "SIEM Coverage Analysis"
+      tools: ALL
+      categories: [siem]
+      timeout_minutes: 60
+
+    - name: "Forensics & IR Readiness"
+      tools: ALL
+      categories: [forensics]
+      timeout_minutes: 60
+
+    - name: "Threat Intelligence Integration"
+      tools: ALL
+      categories: [threat_intel]
+      timeout_minutes: 30
+
+    - name: "Container & Cloud Security"
+      tools: ALL
+      categories: [container_security, cloud_defensive]
+      timeout_minutes: 60
+
+    - name: "Network Monitoring & WAF"
+      tools: ALL
+      categories: [network_monitoring, waf]
+      timeout_minutes: 45
+
+    - name: "Malware Analysis Capability"
+      tools: ALL
+      categories: [malware_analysis]
+      timeout_minutes: 30
+
+compliance:
+  - OWASP_TOP_10
+  - PCI_DSS
+  - SOC2
+  - HIPAA
+  - ISO_27001
+  - NIST_800_53
+  - NIST_CSF
+  - FedRAMP
+  - CMMC
+
+report:
+  format: html
+  sections:
+    - executive_summary
+    - vulnerability_findings
+    - risk_ratings
+    - attack_surface_map
+    - attack_chain_analysis
+    - red_team_narrative
+    - remediation_steps
+    - compliance_checklist
+    - threat_modeling
+    - zero_day_assessment
+    - supply_chain_analysis
+    - retesting_recommendations
+    - blue_team_recommendations
+    - incident_response_readiness
+    - security_architecture_review
+  severity_threshold: info
+  include_raw_output: true
+  include_evidence_screenshots: true
+  include_attack_timeline: true
+  classification: "CONFIDENTIAL"

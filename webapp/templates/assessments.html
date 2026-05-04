@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}HopeUp — Assessments{% endblock %}
+{% block heading %}Assessments{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+    <p style="color:#7f8c8d;">{{ assessments|length }} assessment(s)</p>
+    <a href="{{ url_for('new_assessment') }}" class="btn btn-primary">New Assessment</a>
+</div>
+
+{% if assessments %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Target</th>
+            <th>Tier</th>
+            <th>Scope</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in assessments %}
+        <tr>
+            <td><a href="{{ url_for('view_assessment', assessment_id=a.id) }}" style="color:#00d4ff;text-decoration:none;">{{ a.id }}</a></td>
+            <td style="color:#fff;">{{ a.target }}</td>
+            <td><span class="badge badge-yellow">Tier {{ a.tier }}</span></td>
+            <td>
+                {% if 'red' in a.scope %}<span class="badge badge-red">RED</span>{% endif %}
+                {% if 'blue' in a.scope %}<span class="badge badge-blue">BLUE</span>{% endif %}
+            </td>
+            <td><span class="status-{{ a.status }}">{{ a.status }}</span></td>
+            <td style="color:#7f8c8d;">{{ a.created_at[:16] }}</td>
+            <td>
+                <a href="{{ url_for('view_assessment', assessment_id=a.id) }}" class="btn btn-ghost btn-sm">View</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="card" style="text-align:center;padding:3rem;">
+    <p style="color:#555;font-size:1.1rem;margin-bottom:1rem;">No assessments yet</p>
+    <a href="{{ url_for('new_assessment') }}" class="btn btn-primary">Create Your First Assessment</a>
+</div>
+{% endif %}
+{% endblock %}

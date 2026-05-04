@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}HopeUp — Clients{% endblock %}
+{% block heading %}Clients{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+    <p style="color:#7f8c8d;">{{ clients|length }} client(s)</p>
+    <a href="{{ url_for('new_client') }}" class="btn btn-primary">Add Client</a>
+</div>
+
+{% if clients %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Company</th>
+            <th>Email</th>
+            <th>Tier</th>
+            <th>Industry</th>
+            <th>Added</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cid, client in clients.items() %}
+        <tr>
+            <td style="color:#00d4ff;">{{ cid }}</td>
+            <td style="color:#fff;font-weight:500;">{{ client.name }}</td>
+            <td>{{ client.company }}</td>
+            <td style="color:#7f8c8d;">{{ client.email }}</td>
+            <td><span class="badge badge-yellow">Tier {{ client.tier }}</span></td>
+            <td>{{ client.industry }}</td>
+            <td style="color:#7f8c8d;">{{ client.created_at[:10] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="card" style="text-align:center;padding:3rem;">
+    <p style="color:#555;font-size:1.1rem;margin-bottom:1rem;">No clients yet</p>
+    <a href="{{ url_for('new_client') }}" class="btn btn-primary">Add Your First Client</a>
+</div>
+{% endif %}
+{% endblock %}
