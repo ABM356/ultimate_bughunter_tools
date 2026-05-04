@@ -203,7 +203,15 @@ class AIService:
     ) -> Dict[str, Any]:
         if not vulnerabilities:
             return {"risk_score": 0.0, "risk_level": "low", "drivers": []}
-        max_cvss = max(float(v.get("cvss_base", 0)) for v in vulnerabilities)
+        severity_to_cvss = {"critical": 9.5, "high": 7.5, "medium": 5.0, "low": 2.5, "info": 0.5}
+
+        def to_cvss(v: Dict[str, Any]) -> float:
+            cvss = float(v.get("cvss_base", 0) or 0)
+            if cvss > 0:
+                return cvss
+            return severity_to_cvss.get(str(v.get("severity", "info")).lower(), 0.5)
+
+        max_cvss = max(to_cvss(v) for v in vulnerabilities)
         score = min(100.0, max_cvss * 10 * (1 + (asset_criticality - 1) * 0.1))
         if score >= 80:
             level = "critical"
